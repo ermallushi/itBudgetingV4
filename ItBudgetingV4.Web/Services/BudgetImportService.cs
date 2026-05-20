@@ -105,6 +105,7 @@ public class BudgetImportService(ApplicationDbContext dbContext, IAuditLogServic
                 Category = category
             };
 
+            var hasInvalidMonth = false;
             for (var month = 1; month <= 12; month++)
             {
                 var monthColumn = 17 + month;
@@ -112,7 +113,8 @@ public class BudgetImportService(ApplicationDbContext dbContext, IAuditLogServic
                 if (value < 0)
                 {
                     errors.Add($"Row {rowNumber}: Month {month} has invalid negative value.");
-                    continue;
+                    hasInvalidMonth = true;
+                    break;
                 }
 
                 item.MonthlyValues.Add(new BudgetMonthlyValue
@@ -122,6 +124,11 @@ public class BudgetImportService(ApplicationDbContext dbContext, IAuditLogServic
                     PlannedAmount = value,
                     IsLocked = month <= lockedMonths
                 });
+            }
+
+            if (hasInvalidMonth)
+            {
+                continue;
             }
 
             dbContext.BudgetItems.Add(item);
