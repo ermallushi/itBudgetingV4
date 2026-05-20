@@ -11,7 +11,7 @@
         {
             <form asp-action="EnsureDraft" method="post" class="card card-body mb-3">
                 <label class="form-label">Create Draft Year</label>
-                <input type="number" name="year" value="@DateTime.UtcNow.Year" class="form-control" />
+                <input type="number" name="year" value="@Model.CurrentYear" class="form-control" />
                 <button class="btn btn-primary mt-2" type="submit">Ensure Draft</button>
             </form>
         }

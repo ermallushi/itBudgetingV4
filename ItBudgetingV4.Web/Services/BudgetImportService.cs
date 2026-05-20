@@ -12,6 +12,7 @@ public interface IBudgetImportService
 
 public class BudgetImportService(ApplicationDbContext dbContext, IAuditLogService auditLogService) : IBudgetImportService
 {
+    private const string MustContractType = "Must";
     private static readonly string[] RequiredHeaders =
     [
         "WBS", "SAP Code", "SAP Description", "IT Domain", "IT Subdomain", "Commitment Code", "Hyperion Category", "Hyperion Code",
@@ -100,7 +101,7 @@ public class BudgetImportService(ApplicationDbContext dbContext, IAuditLogServic
                 LrpCategory = row.Cell("N").GetString().Trim(),
                 CostCenter = costCenter,
                 FundCode = row.Cell("P").GetString().Trim(),
-                ContractType = string.Equals(row.Cell("Q").GetString().Trim(), "Must", StringComparison.OrdinalIgnoreCase) ? ContractType.Must : ContractType.Optional,
+                ContractType = ParseContractType(row.Cell("Q").GetString().Trim()),
                 Category = category
             };
 
@@ -131,4 +132,7 @@ public class BudgetImportService(ApplicationDbContext dbContext, IAuditLogServic
         await auditLogService.LogAsync("BudgetImport", versionId.ToString(), "Import", null, $"Imported {imported} rows for {category}", changedBy, cancellationToken);
         return (imported, errors);
     }
+
+    private static ContractType ParseContractType(string value) =>
+        string.Equals(value, MustContractType, StringComparison.OrdinalIgnoreCase) ? ContractType.Must : ContractType.Optional;
 }

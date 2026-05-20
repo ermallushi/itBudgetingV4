@@ -15,7 +15,8 @@ public class VersionsController(ApplicationDbContext dbContext, IBudgetVersionSe
     {
         var model = new VersionIndexViewModel
         {
-            Versions = await dbContext.BudgetVersions.OrderByDescending(v => v.Year).ThenByDescending(v => v.CreatedAt).ToListAsync(cancellationToken)
+            Versions = await dbContext.BudgetVersions.OrderByDescending(v => v.Year).ThenByDescending(v => v.CreatedAt).ToListAsync(cancellationToken),
+            CurrentYear = DateTime.UtcNow.Year
         };
 
         return View(model);
