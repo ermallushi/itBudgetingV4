@@ -1,0 +1,21 @@
+@model List<ItBudgetingV4.Web.ViewModels.ReportRowViewModel>
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<h2>Reports</h2>
+<table class="table table-bordered table-striped">
+    <thead><tr><th>Project</th><th>Category</th><th>Planned</th><th>Actual</th><th>Remaining</th></tr></thead>
+    <tbody>
+    @foreach (var row in Model)
+    {
+        <tr>
+            <td>@row.Project</td>
+            <td>@row.Category</td>
+            <td>@row.Planned.ToString("N2")</td>
+            <td>@row.Actual.ToString("N2")</td>
+            <td class="@(row.Remaining < 0 ? "text-danger fw-bold" : "")">@row.Remaining.ToString("N2")</td>
+        </tr>
+    }
+    </tbody>
+</table>

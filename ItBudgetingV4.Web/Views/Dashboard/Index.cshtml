@@ -1,0 +1,12 @@
+@model ItBudgetingV4.Web.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+<div class="row g-3">
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6>Total Budget</h6><h4>@Model.TotalBudget.ToString("N2")</h4></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6>Remaining Budget</h6><h4 class="@(Model.RemainingBudget < 0 ? "text-danger" : "")">@Model.RemainingBudget.ToString("N2")</h4></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6>CapEx</h6><h4>@Model.CapExTotal.ToString("N2")</h4></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6>OpEx</h6><h4>@Model.OpExTotal.ToString("N2")</h4></div></div></div>
+</div>

@@ -1,0 +1,71 @@
+@using System.Text.Json
+@model List<ItBudgetingV4.Web.ViewModels.BudgetGridRowViewModel>
+@{
+    ViewData["Title"] = "Budget Grid";
+    var version = ViewBag.Version as ItBudgetingV4.Web.Domain.BudgetVersion;
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-quartz.css" />
+
+<h2>Budget Grid</h2>
+<p>Version: <strong>@(version?.Name ?? "N/A")</strong> | Status: <strong>@(version?.Status.ToString() ?? "N/A")</strong></p>
+
+<div id="budgetGrid" class="ag-theme-quartz" style="height: 600px;"></div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <script>
+        const data = @Html.Raw(JsonSerializer.Serialize(Model.Select(x => new {
+            budgetItemId = x.BudgetItemId,
+            wbs = x.Wbs,
+            sapCode = x.SapCode,
+            project = x.Project,
+            category = x.Category,
+            planned = x.Planned,
+            transactions = x.Transactions,
+            remaining = x.Remaining,
+            lockedMonths = x.LockedMonths,
+            jan = x.MonthlyValues.GetValueOrDefault(1),
+            feb = x.MonthlyValues.GetValueOrDefault(2),
+            mar = x.MonthlyValues.GetValueOrDefault(3),
+            apr = x.MonthlyValues.GetValueOrDefault(4),
+            may = x.MonthlyValues.GetValueOrDefault(5),
+            jun = x.MonthlyValues.GetValueOrDefault(6),
+            jul = x.MonthlyValues.GetValueOrDefault(7),
+            aug = x.MonthlyValues.GetValueOrDefault(8),
+            sep = x.MonthlyValues.GetValueOrDefault(9),
+            oct = x.MonthlyValues.GetValueOrDefault(10),
+            nov = x.MonthlyValues.GetValueOrDefault(11),
+            dec = x.MonthlyValues.GetValueOrDefault(12)
+        })));
+
+        const monthMap = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+        const canEdit = @(User.IsInRole("CIO Secretary") && version?.Status == ItBudgetingV4.Web.Domain.BudgetVersionStatus.Draft ? "true" : "false");
+
+        const columnDefs = [
+            { field: 'wbs' }, { field: 'sapCode' }, { field: 'project' }, { field: 'category' },
+            ...Object.keys(monthMap).map(m => ({
+                field: m,
+                editable: (params) => canEdit && !params.data.lockedMonths.includes(monthMap[m]),
+                cellClass: params => params.data.lockedMonths.includes(monthMap[m]) ? 'bg-light' : ''
+            })),
+            { field: 'planned' }, { field: 'transactions' },
+            { field: 'remaining', cellClass: params => params.value < 0 ? 'text-danger fw-bold' : '' }
+        ];
+
+        const grid = agGrid.createGrid(document.querySelector('#budgetGrid'), {
+            rowData: data,
+            columnDefs,
+            defaultColDef: { filter: true, sortable: true, resizable: true },
+            onCellValueChanged: (event) => {
+                if (!monthMap[event.colDef.field]) return;
+                $.post('/Budget/UpdateMonthlyValue', {
+                    budgetItemId: event.data.budgetItemId,
+                    month: monthMap[event.colDef.field],
+                    plannedAmount: event.newValue
+                }).fail(xhr => alert(xhr.responseText || 'Update failed'));
+            }
+        });
+    </script>
+}

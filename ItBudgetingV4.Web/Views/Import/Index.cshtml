@@ -1,0 +1,36 @@
+@model ItBudgetingV4.Web.ViewModels.ImportResultViewModel
+@{
+    ViewData["Title"] = "Excel Import";
+}
+
+<h2>CapEx / OpEx Import</h2>
+
+@if (User.IsInRole("CIO Secretary"))
+{
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" class="card card-body mb-3">
+        <div class="row g-2">
+            <div class="col-md-3"><select name="versionId" class="form-select" asp-items="ViewBag.Versions"></select></div>
+            <div class="col-md-3"><select name="category" class="form-select" asp-items="Html.GetEnumSelectList<ItBudgetingV4.Web.Domain.BudgetCategory>()"></select></div>
+            <div class="col-md-4"><input type="file" name="file" class="form-control" accept=".xlsx" /></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Import</button></div>
+        </div>
+    </form>
+}
+
+@if (Model.ImportedCount > 0)
+{
+    <div class="alert alert-success">Imported @Model.ImportedCount rows (@Model.Category).</div>
+}
+
+@if (Model.Errors.Any())
+{
+    <div class="alert alert-danger">
+        <strong>Import errors:</strong>
+        <ul>
+            @foreach (var error in Model.Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}

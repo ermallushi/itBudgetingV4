@@ -1,0 +1,66 @@
+@model ItBudgetingV4.Web.ViewModels.VersionIndexViewModel
+@{
+    ViewData["Title"] = "Versions";
+}
+
+<h2>Versions</h2>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        @if (User.IsInRole("CIO Secretary"))
+        {
+            <form asp-action="EnsureDraft" method="post" class="card card-body mb-3">
+                <label class="form-label">Create Draft Year</label>
+                <input type="number" name="year" value="@DateTime.UtcNow.Year" class="form-control" />
+                <button class="btn btn-primary mt-2" type="submit">Ensure Draft</button>
+            </form>
+        }
+
+        @if (User.IsInRole("CIO Secretary"))
+        {
+            <form asp-action="CloneRevision" method="post" class="card card-body">
+                <label class="form-label">Source Final Version</label>
+                <select name="sourceFinalVersionId" class="form-select">
+                    @foreach (var item in Model.Versions.Where(v => v.Status == ItBudgetingV4.Web.Domain.BudgetVersionStatus.Final))
+                    {
+                        <option value="@item.Id">@item.Year - @item.Name</option>
+                    }
+                </select>
+                <label class="form-label mt-2">Revision Name</label>
+                <select name="revisionName" class="form-select">
+                    <option>0+12</option>
+                    <option>3+9</option>
+                    <option>5+7</option>
+                    <option>9+3</option>
+                </select>
+                <button class="btn btn-primary mt-2" type="submit">Clone Revision</button>
+            </form>
+        }
+    </div>
+    <div class="col-md-8">
+        <table class="table table-bordered table-striped">
+            <thead><tr><th>Year</th><th>Name</th><th>Status</th><th>Parent</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody>
+            @foreach (var version in Model.Versions)
+            {
+                <tr>
+                    <td>@version.Year</td>
+                    <td>@version.Name</td>
+                    <td>@version.Status</td>
+                    <td>@version.ParentVersionId</td>
+                    <td>@version.CreatedAt.ToString("u")</td>
+                    <td>
+                        @if (version.Status == ItBudgetingV4.Web.Domain.BudgetVersionStatus.Draft && User.IsInRole("CIO"))
+                        {
+                            <form asp-action="FinalizeVersion" method="post">
+                                <input type="hidden" name="versionId" value="@version.Id" />
+                                <button class="btn btn-sm btn-success" type="submit">Finalize</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

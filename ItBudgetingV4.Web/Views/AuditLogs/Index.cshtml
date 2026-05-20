@@ -1,0 +1,22 @@
+@model List<ItBudgetingV4.Web.Domain.AuditLog>
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<h2>Audit Log</h2>
+<table class="table table-sm table-striped">
+    <thead><tr><th>Changed At</th><th>User</th><th>Entity</th><th>Field</th><th>Old</th><th>New</th></tr></thead>
+    <tbody>
+    @foreach (var log in Model)
+    {
+        <tr>
+            <td>@log.ChangedAt.ToString("u")</td>
+            <td>@log.ChangedBy</td>
+            <td>@log.EntityType #@log.EntityId</td>
+            <td>@log.FieldName</td>
+            <td>@log.OldValue</td>
+            <td>@log.NewValue</td>
+        </tr>
+    }
+    </tbody>
+</table>
